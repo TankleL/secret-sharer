@@ -26,16 +26,16 @@ public:
 	// deleted:
 	explicit FixedBuffer() = delete;
 	explicit FixedBuffer(const FixedBuffer& fixbuffer) = delete;
+
 public:
 	void Write(const size_t& offset, void const * const pSrc, const size_t& size);
 	void Read(void * const pDist, const size_t& offset, const size_t& size) const;
-	void Resize(const size_t& sizeInBytes);
 
 	const size_t Size() const;
-	const void* Buffer() const;
+	void* Buffer() const;
 private:
-	size_t				m_size;
-	Enco::byte *		m_pData;
+	size_t const		m_size;
+	Enco::byte * const	m_pData;
 };
 
 
@@ -48,7 +48,7 @@ public:
 	* @remarks: MUST RELEASE THE SECRET CONTAINER' DATA, by calling ReleaseSharedSecrets().
 	*/
 	virtual bool	Encode(std::vector<FixedBuffer*>& sharedSecrets, const unsigned int& n, const unsigned int& k, const FixedBuffer& secretToShare) = 0;
-	virtual bool	Decode(FixedBuffer& recoverdSecret, const std::vector<FixedBuffer*>& sharedSecrets) = 0;
+	virtual bool	Decode(FixedBuffer** ppRecoverdSecret, const std::vector<FixedBuffer*>& sharedSecrets) = 0;
 
 	static void		ReleaseSharedSecrets(std::vector<FixedBuffer*>& sharedSecrets);
 };
@@ -79,7 +79,7 @@ public:
 	*   |  * secret data    [ x bytes ]         |
 	*   -----------------------------------------
 	*/
-	virtual bool	Decode(FixedBuffer& recoverdSecret, const std::vector<FixedBuffer*>& sharedSecrets) override;
+	virtual bool	Decode(FixedBuffer** ppRecoverdSecret, const std::vector<FixedBuffer*>& sharedSecrets) override;
 
 private: 	// math tools
 	static Enco::uint32 _Power(Enco::uint32 a, int b);

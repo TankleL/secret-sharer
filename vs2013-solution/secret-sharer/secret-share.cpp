@@ -43,23 +43,12 @@ void FixedBuffer::Read(void * const pDist, const size_t& offset, const size_t& s
 	memcpy(pDist, pStart, size);
 }
 
-void FixedBuffer::Resize(const size_t& sizeInBytes)
-{
-	if (m_pData != nullptr)
-	{
-		delete[] m_pData;
-	}
-
-	m_pData = new Enco::byte[sizeInBytes];
-	m_size = sizeInBytes;
-}
-
 const size_t FixedBuffer::Size() const
 {
 	return m_size;
 }
 
-const void* FixedBuffer::Buffer() const
+void* FixedBuffer::Buffer() const
 {
 	return m_pData;
 }
@@ -151,7 +140,7 @@ bool DefaultSecretSharer::Encode(std::vector<FixedBuffer*>& sharedSecrets, const
 *   |  * secret data    [ x bytes ]         |
 *   -----------------------------------------
 */
-bool DefaultSecretSharer::Decode(FixedBuffer& recoverdSecret, const std::vector<FixedBuffer*>& sharedSecrets)
+bool DefaultSecretSharer::Decode(FixedBuffer** ppRecoverdSecret, const std::vector<FixedBuffer*>& sharedSecrets)
 {
 	if (sharedSecrets.size() <= 0)
 		return false;
@@ -173,7 +162,8 @@ bool DefaultSecretSharer::Decode(FixedBuffer& recoverdSecret, const std::vector<
 		
 	Enco::uint32*	pShr = new Enco::uint32[sharedSecrets.size()];
 	char			data;
-	recoverdSecret.Resize(secLen / 4 - 1);
+
+	*ppRecoverdSecret = new FixedBuffer(secLen / 4 - 1);
 	for (size_t idx = 0; idx < secLen / 4 - 1; ++idx)
 	{
 		for (unsigned int j = 0; j < sharedSecrets.size(); ++j)
@@ -182,7 +172,7 @@ bool DefaultSecretSharer::Decode(FixedBuffer& recoverdSecret, const std::vector<
 		}
 
 		data = (char)_Decode(pIndice, pShr, sharedSecrets.size());
-		recoverdSecret.Write(idx, &data, sizeof(char));
+		(*ppRecoverdSecret)->Write(idx, &data, sizeof(char));
 	}
 
 	if (pShr != nullptr)

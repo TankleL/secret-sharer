@@ -145,13 +145,14 @@ bool DecodeFiles(const string& outFileName, const vector<string>& fileNames)
 	DefaultRandomer dr;
 	DefaultSecretSharer	dss(dr);
 
-	FixedBuffer	fb(10);
-	if (false == dss.Decode(fb, shrdSecs))
+	FixedBuffer*	pFb;
+	if (false == dss.Decode(&pFb, shrdSecs))
 		return false;
 
 	dss.ReleaseSharedSecrets(shrdSecs);
 
 	ofstream outFile(outFileName, ios::out | ios::binary);
-	outFile.write((const char*)fb.Buffer(), fb.Size());
+	outFile.write((const char*)pFb->Buffer(), pFb->Size());
+	delete pFb;
 	return true;
 }
